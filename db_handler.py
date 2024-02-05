@@ -1,5 +1,5 @@
-from database.config import get_database_cursor
 from functools import reduce
+from database.config import get_database_cursor
 
 
 def get_student():
@@ -27,7 +27,8 @@ def get_student():
         result_student = cursor.fetchall()
         if len(result_student) != 0:
             return (reduce(lambda students_dict, x: (students_dict.update({
-                x[0]: {"first_name": x[1], "last_name": x[2],"total_course_cost": x[3], "total_paid": x[4]}})) or students_dict, result_student, {}))
+                x[0]: {"first_name": x[1], "last_name": x[2],"total_course_cost": x[3],
+                       "total_paid": x[4]}})) or students_dict, result_student, {}))
 
 
 def get_courses():
@@ -51,7 +52,9 @@ def get_courses():
         cursor.execute(COMMAND)
         result_courses = cursor.fetchall()
         if len(result_courses) != 0:
-            return (reduce(lambda course_dict, x: (course_dict.update({x[0]: {"accademy_id": x[1], "course_name": x[2], "course_price": x[3]}})) or course_dict, result_courses, {}))
+            return (reduce(lambda course_dict, x: (course_dict.update({
+                x[0]: {"accademy_id": x[1], "course_name": x[2], "course_price": x[3]}}))
+                           or course_dict, result_courses, {}))
 
 
 def get_academies():
@@ -79,10 +82,10 @@ def get_academies():
 
             # map into dict_academy{academy_id:academy_name}
             dict_academy.update({row_academy[0]: row_academy[1]})
-        return (dict_academy)
+        return dict_academy
 
 
-def get_enrolled_list(id):
+def get_enrolled_list(student_id):
     """
     Fetches a list of courses in which a student, identified by their ID, is
     enrolled.
@@ -99,7 +102,7 @@ def get_enrolled_list(id):
     COMMAND = """SELECT * FROM student_courses WHERE student_id = (%s);"""
 
     with get_database_cursor() as cursor:
-        cursor.execute(COMMAND, (id,))
+        cursor.execute(COMMAND, (student_id,))
         result_enrolled_list = cursor.fetchall()
 
         # The data from database comes in format `[(1, 1), (1, 4), (1, 2)]`
@@ -107,7 +110,7 @@ def get_enrolled_list(id):
             map(lambda result: result[1], result_enrolled_list))
         # Convert the above format into `[1, 4, 2]`
 
-        return (get_course_name(result_enrolled_list))
+        return get_course_name(result_enrolled_list)
 
 
 def get_course_name(enrolled_list):
@@ -177,7 +180,7 @@ def update_student(roll_no, student):
         cursor.execute(COMMAND, new_tuple)
 
 
-def remove_student(id):
+def remove_student(student_id):
     """
     Deletes a student from the database based on their roll number.
 
@@ -191,7 +194,7 @@ def remove_student(id):
     COMMAND = """DELETE FROM students WHERE roll_number =(%s);"""
 
     with get_database_cursor() as cursor:
-        cursor.execute(COMMAND, (id,))
+        cursor.execute(COMMAND, (student_id,))
 
 
 def get_student_courses(student_id, course_id):

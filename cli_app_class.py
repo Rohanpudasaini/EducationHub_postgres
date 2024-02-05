@@ -5,6 +5,55 @@ from display_functions import print_colored_message, Colors
 
 
 class Student:
+    """
+    Represents the operations related to student management in a database.
+
+    This class provides functionalities for adding new students, removing existing students,
+    updating student information, managing course enrollments, processing fee payments,
+    and retrieving student and course-related data from the database.
+
+    All operations assume the presence of a global `db_handler` object for database interactions,
+    which should support methods for adding, removing, updating, and querying student
+    and course data.
+    
+    Methods:
+        add_student(): 
+            Adds a new student to the database.
+        
+        remove_student(): 
+            Removes a student from the database based on user-provided roll number.
+
+        show_remaining_fee(): 
+            Displays the remaining fee for a student specified by the user.
+
+        pay_fee(): 
+            Processes the fee payment for a student, allowing for updates to their payment status.
+
+        join_course():
+            Enrolls a student in a course, updating the total course price for the student.
+
+        opt_course():
+            Opts a student out of a course, updating their total course price accordingly.
+
+        change_session():
+            Updates session information for all students, considering their fee status.
+
+        get_remaining_payment(student_id):
+            Retrieves the remaining payment amount for a specific student.
+
+        update_total_price(student_id):
+            Updates the total cost of courses for a student.
+
+        get_student():
+            Fetches student data from the database.
+
+        update_student(roll_num_to_pay, student):
+            Updates the database record for a student.
+            
+        get_enrolled_list(student_id):
+            Retrieves a list of courses in which a student is enrolled.
+
+    """
 
     @classmethod
     def remove_student(cls):
@@ -192,7 +241,8 @@ and enter again: """))
             if remaning < 0:
                 remaning = remaning * -1
                 print_colored_message(
-                    f"\t\tThe Student {values['first_name']} {values['last_name']} have {remaning} fee over charged, please check whith him/her once", Colors.GREEN)
+                    f"\t\tThe Student {values['first_name']} {values['last_name']} have {remaning} fee over charged, please check whith him/her once",
+                    Colors.GREEN)
         input("\n\nContinue ....")
 
     @staticmethod
@@ -207,7 +257,8 @@ and enter again: """))
             float: The remaining amount to be paid by the student.
         """
         student_data = db_handler.get_student()
-        student = student_data.get(student_id, "Can't find the id in our Database")
+        student = student_data.get(
+            student_id, "Can't find the id in our Database")
         if isinstance(student, str):
             return student
         remaining = float(student["total_course_cost"]
@@ -303,7 +354,35 @@ and enter again: """))
 
 
 class Academy:
+    """
+    Manages academy-related operations including adding academies, displaying courses,
+    checking student enrollments, and retrieving academy details.
 
+    This class interacts with a database through a global `db_handler` object to perform
+    operations such as adding new academies to the database, showing all available courses,
+    checking if a student is enrolled in a specific course, and fetching details about the academy.
+
+    Methods:
+        add_academy():
+            Prompts the user to add a new academy by name. Adds the academy
+            to the database if it doesn't already exist.
+        
+        show_all_course(show=False):
+            Displays all courses offered by the academy. Can optionally clear the
+            screen before displaying the courses based on the `show` parameter.
+
+        get_courses():
+            Retrieves and returns a dictionary of all courses offered by the
+            academy along with their details.
+
+        if_student_enrolled(student_id, course_id): 
+            Checks if a student,identified by their roll number,
+            is enrolled in a specified courseand returns a boolean value.
+
+        get_academy(): 
+            Fetches and returns details about the academy from the database.
+
+    """
     @classmethod
     def add_academy(cls):
         """

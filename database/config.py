@@ -1,13 +1,40 @@
 # from configparser import ConfigParser
-import psycopg2
-from dotenv import load_dotenv
 import os
 from contextlib import contextmanager
-load_dotenv()
+import psycopg2
+from dotenv import load_dotenv
 
+load_dotenv()
 
 @contextmanager
 def get_database_cursor():
+    """
+    Context manager to yield a cursor to the PostgreSQL database.
+
+    Establishes a connection to a PostgreSQL database using credentials
+    obtained from environment variables and yields a cursor for executing
+    database operations. Upon exiting the context, the cursor is closed,
+    any changes are committed, and the connection is closed. If an exception
+    occurs, it prints the error message, rolls back the transaction, and
+    ensures that resources are properly released.
+
+    Yields:
+        psycopg2.extensions.cursor: A cursor for executing PostgreSQL commands
+        through the established connection.
+
+    Environment Variables:
+        - host: Database host address.
+        - database: Name of the database to connect to.
+        - user: Username for authentication.
+        - password: Password for authentication.
+
+    Example:
+        with get_database_cursor() as cursor:
+            cursor.execute("SELECT * FROM table_name;")
+            results = cursor.fetchall()
+            for row in results:
+                print(row)
+    """
     host = os.getenv('host')
     database = os.getenv('database')
     user = os.getenv('user')
@@ -31,7 +58,7 @@ def get_database_cursor():
 
 
 if __name__ == '__main__':
-    conn, curr = (get_database_cursor())
+    conn, curr = get_database_cursor()
     curr.execute("""SELECT * FROM students;""")
     print(curr.fetchall())
 
