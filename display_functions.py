@@ -47,20 +47,19 @@ def show_welcome_screen():
     print_colored_message(
         "\n\n\t\t\t\t\t\tWelcome to the Educational App!\n\n\n\n", Colors.CYAN)
     print_colored_message('''
-                                                                                                                        
+
     _/_/_/_/        _/                                  _/      _/                          _/    _/            _/       
    _/          _/_/_/  _/    _/    _/_/_/    _/_/_/  _/_/_/_/        _/_/    _/_/_/        _/    _/  _/    _/  _/_/_/    
   _/_/_/    _/    _/  _/    _/  _/        _/    _/    _/      _/  _/    _/  _/    _/      _/_/_/_/  _/    _/  _/    _/   
  _/        _/    _/  _/    _/  _/        _/    _/    _/      _/  _/    _/  _/    _/      _/    _/  _/    _/  _/    _/    
 _/_/_/_/    _/_/_/    _/_/_/    _/_/_/    _/_/_/      _/_/  _/    _/_/    _/    _/      _/    _/    _/_/_/  _/_/_/       
-                                                                                                                         
-                                                                                                                                                                                                                                                                                                                                              
+
 ''', color=Colors.GREEN)
     input("\t\t\t\tPress any key to continue...")
 
 
 def show_courses_menu():
-    print_colored_message("\n\t\t\t1. Add Academy",Colors.GREEN)
+    print_colored_message("\n\t\t\t1. Add Academy", Colors.GREEN)
     # print_colored_message("\t\t\t2. Remove Academy",Colors.BLUE)
     print_colored_message("\n\t\t\t2. Exit", Colors.RED)
     print("\n\n\n\n")

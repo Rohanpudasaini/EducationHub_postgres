@@ -2,28 +2,42 @@
 import psycopg2
 from dotenv import load_dotenv
 import os
+from contextlib import contextmanager
 load_dotenv()
 
 
-def load_database_connection_and_cursor():
+@contextmanager
+def get_database_cursor():
     host = os.getenv('host')
     database = os.getenv('database')
     user = os.getenv('user')
     password = os.getenv('password')
     config = {"host": host, "database": database,
               "user": user, "password": password}
-    postgress_connection = psycopg2.connect(**config)
-    postgress_cursor = postgress_connection.cursor()
-    return postgress_connection, postgress_cursor
+    try:
+        postgress_connection = psycopg2.connect(**config)
+        postgress_cursor = postgress_connection.cursor()
+        yield postgress_cursor
+    except psycopg2.DatabaseError as error:
+        print(f"Database Error: {error}")
+        postgress_connection.rollback()
+    finally:
+        if postgress_cursor:
+            postgress_cursor.close()
+
+        if postgress_connection:
+            postgress_connection.commit()
+            postgress_connection.close()
 
 
 if __name__ == '__main__':
-    conn, curr = (load_database_connection_and_cursor())
+    conn, curr = (get_database_cursor())
     curr.execute("""SELECT * FROM students;""")
     print(curr.fetchall())
 
 
-# def load_database_connection_and_cursor(filename='database/database.ini', section='postgresql'):
+# def load_database_connection_and_cursor(filename='database/database.ini',
+# section='postgresql'):
 #     parser = ConfigParser()
 #     parser.read(filename)
 
@@ -33,7 +47,9 @@ if __name__ == '__main__':
 #         for param in params:
 #             config[param[0]] = param[1]
 #     else:
-#         raise Exception(f'Section {section} not found in the {filename} file')
+#         raise Exception(
+    # f'Section {section} not found in the {filename} file'
+# )
 
 #     # return config
 #
