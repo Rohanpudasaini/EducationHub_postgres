@@ -327,11 +327,11 @@ class Academy:
     def if_student_enrolled(student_id, course_id):
         """
         Checks if a specific student, identified by their roll number, is enrolled in a specific course, identified by the course ID. Returns True if the student is enrolled in the course, otherwise False.
-        
+
         Args:
             student_id (int): The roll number of the student.
             course_id (int): The ID of the course.
-        
+
         Returns:
             bool: True if the student is enrolled in the specified course, otherwise False.
         """

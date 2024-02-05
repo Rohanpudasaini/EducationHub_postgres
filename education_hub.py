@@ -24,7 +24,7 @@ def show_student_rows():
             name += " "*(23-count)
         print_colored_message(
             f"{name} | |\t {key} \t\t\t|| {enrolled_string}", Colors.YELLOW)
-    
+
     # Start of student's main menu
     choice = show_student_menu()
     match choice:
@@ -105,7 +105,7 @@ def show_university():
                 f"\t\t\t {key2.strip()}: {values2}", Colors.YELLOW)
     choice = show_courses_menu()
     match choice:
-        
+
         case "1":
             # show_main_menu
             return False

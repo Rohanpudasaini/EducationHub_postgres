@@ -4,13 +4,15 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 
+
 def load_config():
     host = os.getenv('host')
-    database= os.getenv('database')
-    user= os.getenv('user')
-    password= os.getenv('password')
+    database = os.getenv('database')
+    user = os.getenv('user')
+    password = os.getenv('password')
     # config = dict(os.environ)
-    config = {"host":host, "database":database,"user":user,"password":password}
+    config = {"host": host, "database": database,
+              "user": user, "password": password}
     print(config)
     postgress_connection = psycopg2.connect(**config)
     postgress_cursor = postgress_connection.cursor()
@@ -21,8 +23,8 @@ if __name__ == '__main__':
     conn, curr = (load_config())
     curr.execute("""SELECT * FROM students;""")
     print(curr.fetchall())
-    
-    
+
+
 # def load_config(filename='database/database.ini', section='postgresql'):
 #     parser = ConfigParser()
 #     parser.read(filename)
@@ -36,6 +38,4 @@ if __name__ == '__main__':
 #         raise Exception(f'Section {section} not found in the {filename} file')
 
 #     # return config
-#     
-
-
+#
