@@ -1,39 +1,193 @@
-from db_connect import DatabaseHandler
+import db_handler
 from display_functions import *
 import os
 
 
 class Student:
 
-    @staticmethod
-    def update_total_price(db_handler, db_config, student_id):
+    @classmethod
+    def remove_student(cls):
         """
-        Updates the total cost of courses for the student.
+        Removes a student from the database based on the roll number provided by the user.
+        """
 
+        try:
+            roll_num_to_remove = int(
+                input("Enter the roll number to remove: "))
+        except ValueError:
+            roll_num_to_remove = int(
+                input("Invalid roll number format, please check roll number and enter again: "))
+
+        student = cls.get_student()
+        if roll_num_to_remove in student:
+            db_handler.remove_student(roll_num_to_remove)
+        else:
+            print_colored_message(
+                f"No student with roll number {roll_num_to_remove}", Colors.RED)
+        input("\n\nPress anykey to continue...")
+
+    @classmethod
+    def show_remaining_fee(cls):
+        """
+        Displays the remaining fee for a specific student.
+        Ask for a student roll number and then give remaining fee of that student.
+
+        """
+        student = cls.get_student()
+        try:
+            roll_num_to_fee = int(
+                input("Enter the roll number to get remaning fee: "))
+        except ValueError:
+            roll_num_to_fee = int(
+                input("Invalid roll number format, please check roll number and enter again: "))
+        if roll_num_to_fee in student:
+            fee = cls.get_remaining_payment(roll_num_to_fee)
+            if fee < 0:
+                fee = str(
+                    fee * -1) + " Overpaid, please check accounts for refund or enroll to any other course."
+            else:
+                fee = str(fee) + " Remaning, please pay the fee at time"
+            print(fee)
+        else:
+            print_colored_message(
+                f"No student with roll number {roll_num_to_fee}", Colors.RED)
+        input("\n\nPress anykey to continue...")
+
+    @classmethod
+    def pay_fee(cls):
+        """
+        Processes the fee payment for a specific student.
+
+        """
+        student = cls.get_student()
+        # student = cls.get_student(db_handler,db_config)
+        try:
+            roll_num_to_pay = int(
+                input("Enter the roll number to get pay fee: "))
+        except ValueError:
+            roll_num_to_pay = int(
+                input("Invalid roll number format, please check roll number and enter again: "))
+        if roll_num_to_pay in student:
+            remaining_fee = 'remaning'
+            cash_status = "paying"
+            fee = cls.get_remaining_payment(roll_num_to_pay)
+            refund = False
+            if fee < 0:
+                remaining_fee = "overpaid"
+                cash_status = "refunding"
+                fee = fee * -1
+                refund = True
+
+            print(
+                f"The student have {fee} fee {remaining_fee}, {cash_status} the fee now.")
+            # student = Student.get_student()
+            if not refund:
+                student[int(roll_num_to_pay)]["total_paid"] = float(
+                    student[int(roll_num_to_pay)]["total_paid"]) + fee
+            else:
+                student[int(roll_num_to_pay)]["total_paid"] = student[int(
+                    roll_num_to_pay)]["total_paid"] - fee
+
+            cls.update_student(roll_num_to_pay, tuple(
+                (student[roll_num_to_pay]).values()))
+        else:
+            print_colored_message(
+                f"No student with roll number {roll_num_to_pay}", Colors.RED)
+        input("\n\nEnter anykey to continue....")
+
+    @classmethod
+    def join_course(cls):
+        """
+        Enrolls a student in a new course. 
+        Prompts the user to enter the roll number of the student and the ID of the course they wish to enroll in. 
+        It checks if the student is already enrolled in the specified course. 
+        If not, it proceeds to enroll the student in the course and updates the total course price for the student. 
+        If the student is already enrolled or if the course ID is invalid, it displays an appropriate message.
+        """
+        try:
+            roll_number_to_join = int(
+                input("Enter the roll number to get Join a course: "))
+        except ValueError:
+            roll_number_to_join = int(
+                input("Invalid roll number format, please check roll number and enter again: "))
+        Academy.show_all_course()
+        all_course_list = Academy.get_courses()
+        while True:
+            try:
+                course_id_to_add = int(
+                    input("Enter the Course ID of the course you want to add:  ").strip())
+                break
+            except ValueError:
+                print("Please Enter number only")
+
+        if course_id_to_add in all_course_list:
+            student_already_enrolled = Academy.if_student_enrolled(
+                roll_number_to_join, course_id_to_add)
+            if not student_already_enrolled:
+                db_handler.join_course(roll_number_to_join, course_id_to_add)
+                cls.update_total_price(roll_number_to_join)
+            else:
+                print_colored_message(
+                    f"The User with roll number {roll_number_to_join} is already enrolled into {course_id_to_add} course", Colors.RED)
+        else:
+            print_colored_message("No Such Course ID", Colors.RED)
+        input("\n Press any key to continue")
+
+    @classmethod
+    def opt_course(cls):
+        """
+        Opts a student out of a course. 
+        Prompts the user to enter the roll number of the student and the ID of the course they wish to opt out of. 
+        It verifies if the course ID is valid and if the student is enrolled in that course before proceeding to opt the student out of the course. 
+        After opting out, it updates the student's total course price.
         Args:
-            id (int): The roll number of the student.
+            db_handler (DatabaseHandler): A DatabaseHandler object.
         """
-        student_data = db_handler.get_student(db_config)
-        all_course_list = db_handler.get_courses(db_config)
-        student_course_list = db_handler.get_student_all_courses(
-            db_config, student_id)
-        student_course_list = list(map(lambda x: x[1], student_course_list))
-        total_course_price = 0
-        for course in student_course_list:
-            total_course_price += all_course_list[course]['course_price']
-        student_data[student_id]["total_course_cost"] = total_course_price
-        # ipdb.set_trace()
-        # total_cost = 0
-        # student = db_handler.get_student()
-        # for course in student[id]["Enrolled_list"]:
-        #     if course != "":
-        #         total_cost += int(all_course_list[course])
-        # student_data[id]["Total_cost"] = str(total_cost)
-        # db_handler.write_student(student_data)
-        db_handler.update_student(db_config, student_id, tuple(
-            (student_data[student_id]).values()))
+        try:
+            roll_number_to_opt = int(
+                input("Enter the roll number to get Opt from a course: "))
+        except ValueError:
+            roll_number_to_opt = int(
+                input("Invalid roll number format, please check roll number and enter again: "))
+        # show_all_course()
+        student = cls.get_student()
+        Academy.show_all_course(show=True)
+        try:
+            course_id_to_remove = int(
+                input("Enter the ID of the course you want to remove:  "))
+        except ValueError:
+            course_id_to_remove = int(
+                input("Invalid roll number format, please check roll number and enter again: "))
+        courses = db_handler.get_courses()
+        course_ids_list = list(courses.keys())
+        if course_id_to_remove in course_ids_list:
+            db_handler.opt_course(roll_number_to_opt, course_id_to_remove)
+            cls.update_total_price(int(roll_number_to_opt))
+        else:
+            print_colored_message("No Such Course ID", Colors.RED)
+            input()
 
-    def get_remaining_payment(self, id, db_handler, db_config):
+    @staticmethod
+    def change_session():
+        """
+        Changes the session for all students, checking their fee status.
+
+        """
+        print_colored_message("\n\t\tChanging Session", Colors.GREEN)
+        student = db_handler.get_student()
+        for key, values in student.items():
+            remaning = Student.get_remaining_payment(int(key))
+            if remaning > 0:
+                print_colored_message(
+                    f"\t\tThe Student {values['first_name']} have {remaning} fee, please check whith him/her once", Colors.RED)
+            if remaning < 0:
+                remaning = remaning * -1
+                print_colored_message(
+                    f"\t\tThe Student {values['first_name']} {values['last_name']} have {remaning} fee over charged, please check whith him/her once", Colors.GREEN)
+        input("\n\nContinue ....")
+
+    @staticmethod
+    def get_remaining_payment(id):
         """
         Retrieves the remaining payment amount for the student.
 
@@ -43,7 +197,7 @@ class Student:
         Returns:
             float: The remaining amount to be paid by the student.
         """
-        student_data = db_handler.get_student(db_config)
+        student_data = db_handler.get_student()
         student = student_data.get(id, "Can't find the id in our Database")
         if isinstance(student, str):
             return student
@@ -51,54 +205,69 @@ class Student:
                           ) - float(student["total_paid"])
         return remaining
 
-    @classmethod
-    def start_db_handeling(cls):
-        """
-        Initializes database handling for the student.
-        """
-        cls.db_handler = DatabaseHandler()
-        cls.db_config = cls.db_handler.start_db_handeling()
-
     @staticmethod
-    def get_student(db_handler, db_config):
+    def update_total_price(student_id):
         """
-        Retrieves student data from the database.
+        Updates the total cost of courses for the student.
 
         Args:
-            db_handler (DatabaseHandler): A DatabaseHandler object.
+            id (student_id): The roll number of the student.
+        """
+        student_data = db_handler.get_student()
+        all_course_list = db_handler.get_courses()
+        student_course_list = db_handler.get_student_all_courses(student_id)
+        student_course_list = list(map(lambda x: x[1], student_course_list))
+        total_course_price = 0
+        for course in student_course_list:
+            total_course_price += all_course_list[course]['course_price']
+        student_data[student_id]["total_course_cost"] = total_course_price
+        db_handler.update_student(student_id, tuple(
+            (student_data[student_id]).values()))
+
+    @staticmethod
+    def get_student():
+        """
+        Retrieves student data from the database.
 
         Returns:
             dict: A dictionary containing student data.
         """
-        return db_handler.get_student(db_config)
+        return db_handler.get_student()
 
     @staticmethod
-    def update_student(db_handler, db_config, roll_num_to_pay, student):
+    def update_student(roll_num_to_pay, student):
         """
-        Writes student data to the database.
+        Update student data to the database.
 
         Args:
-            db_handler (DatabaseHandler): A DatabaseHandler object.
+            roll_num_to_pay(int): Roll number of student to update.
             student (dict): A dictionary containing the student's data.
         """
-        return db_handler.update_student(db_config, roll_num_to_pay, student)
+        return db_handler.update_student(roll_num_to_pay, student)
 
     @staticmethod
-    def get_enrolled_list(id, db_handler, db_config):
-        return db_handler.get_enrolled_list(id, db_config)
-
-    @classmethod
-    def add_student(cls, db_handler, db_config, student: dict, roll_list):
+    def get_enrolled_list(id):
         """
-        Adds a new student to the database.
+        Retrieves a list of courses a specific student, identified by their roll number, is enrolled in.
 
+        Args:
+            id (int): The roll number of the student.
+
+        Returns:
+            list: A list of courses the student is enrolled in.
+        """
+
+        return db_handler.get_enrolled_list(id)
+
+    @staticmethod
+    def add_student():
+        """
+        Adds a new student to the database. 
+        Prompts the user for the student's full name and the current price paid,
+        then adds the student to the database with an automatically assigned roll number.
         Args:
             student (dict): A dictionary containing the new student's data.
         """
-        # try:
-        #     last_roll_number = list(student.keys())[-1]
-        # except ValueError:
-        #     last_roll_number = 0
         full_name = input(
             "\n\nEnter Students full name i.e name and surname only: ").split(" ", 1)
         if len(full_name) == 2:
@@ -117,285 +286,23 @@ class Student:
                 print_colored_message(
                     "Wrong fee format, please use digit only. \U0001F928 ", Colors.RED)
         student_tuple = (firstname, lastname, current_paid)
-        # if rollnumber  in student:
-        #     print_colored_message(f"The User with Roll NO {rollnumber} already exsist. Do you want to edit the user? (y/n):", Colors.RED)
-        #     edit = input()
-        #     if edit.lower() == "y":
-        #         updated_student_tuple = (firstname, lastname,current_paid)
-        #         db_handler.update_student(db_config,rollnumber, updated_student_tuple)
-        #     else:
-        #         print_colored_message('''Redirecting back to the Student page......''', Colors.YELLOW)
-        #         cls.add_student(db_handler,db_config,student)
-        # else:
-        cls.db_handler.add_student(db_config, student_tuple)
-
-    @classmethod
-    def remove_student(cls, db_handler, db_config):
-        """
-        Removes a student from the database based on their roll number.
-
-        Args:
-            db_handler (DatabaseHandler): A DatabaseHandler object.
-        """
-
-        try:
-            roll_num_to_remove = int(
-                input("Enter the roll number to remove: "))
-        except ValueError:
-            roll_num_to_remove = int(
-                input("Invalid roll number format, please check roll number and enter again: "))
-
-        student = cls.get_student(db_handler, db_config)
-        if roll_num_to_remove in student:
-            cls.db_handler.remove_student(db_config, roll_num_to_remove)
-        else:
-            print_colored_message(
-                f"No student with roll number {roll_num_to_remove}", Colors.RED)
-        input("\n\nPress anykey to continue...")
-
-    @classmethod
-    def show_remaining_fee(cls, db_handler, db_config):
-        """
-        Displays the remaining fee for a specific student.
-
-        Args:
-            db_handler (DatabaseHandler): A DatabaseHandler object.
-        """
-        student = cls.get_student(db_handler, db_config)
-        try:
-            roll_num_to_fee = int(
-                input("Enter the roll number to get remaning fee: "))
-        except ValueError:
-            roll_num_to_fee = int(
-                input("Invalid roll number format, please check roll number and enter again: "))
-        if roll_num_to_fee in student:
-            fee = cls.get_remaining_payment(
-                Student, roll_num_to_fee, db_handler, db_config)
-            if fee < 0:
-                fee = str(
-                    fee * -1) + " Overpaid, please check accounts for refund or enroll to any other course."
-            else:
-                fee = str(fee) + " Remaning, please pay the fee at time"
-            print(fee)
-        else:
-            print_colored_message(
-                f"No student with roll number {roll_num_to_fee}", Colors.RED)
-        input("\n\nPress anykey to continue...")
-
-    @classmethod
-    def pay_fee(student, cls, db_handler, db_config):
-        """
-        Processes the fee payment for a specific student.
-
-        Args:
-            db_handler (DatabaseHandler): A DatabaseHandler object.
-        """
-        # student = cls.get_student(db_handler,db_config)
-        try:
-            roll_num_to_pay = int(
-                input("Enter the roll number to get pay fee: "))
-        except ValueError:
-            roll_num_to_pay = int(
-                input("Invalid roll number format, please check roll number and enter again: "))
-        if roll_num_to_pay in student:
-            remaining_fee = 'remaning'
-            cash_status = "paying"
-            fee = cls.get_remaining_payment(
-                cls, roll_num_to_pay, db_handler, db_config)
-            refund = False
-            if fee < 0:
-                remaining_fee = "overpaid"
-                cash_status = "refunding"
-                fee = fee * -1
-                refund = True
-
-            print(
-                f"The student have {fee} fee {remaining_fee}, {cash_status} the fee now.")
-            # student = Student.get_student()
-            if not refund:
-                student[int(roll_num_to_pay)]["total_paid"] = float(
-                    student[int(roll_num_to_pay)]["total_paid"]) + fee
-            else:
-                student[int(roll_num_to_pay)]["total_paid"] = student[int(
-                    roll_num_to_pay)]["total_paid"] - fee * 0.85
-
-            cls.update_student(db_handler, db_config, roll_num_to_pay, tuple(
-                (student[roll_num_to_pay]).values()))
-        else:
-            print_colored_message(
-                f"No student with roll number {roll_num_to_pay}", Colors.RED)
-        input("\n\nEnter anykey to continue....")
-
-    @classmethod
-    def join_course(cls, db_handler, db_config):
-        """
-        Enrolls a student in a new course.
-
-        Args:
-            db_handler (DatabaseHandler): A DatabaseHandler object.
-        """
-        try:
-            roll_number_to_join = int(
-                input("Enter the roll number to get Join a course: "))
-        except ValueError:
-            roll_number_to_join = int(
-                input("Invalid roll number format, please check roll number and enter again: "))
-        Academy.show_all_course(db_handler, db_config)
-        all_course_list = Academy.get_courses(db_handler, db_config)
-        while True:
-            try:
-                course_id_to_add = int(
-                    input("Enter the Course ID of the course you want to add:  ").strip())
-                break
-            except ValueError:
-                print("Please Enter number only")
-
-        if course_id_to_add in all_course_list:
-            student_already_enrolled = Academy.if_student_enrolled(
-                db_handler, db_config, roll_number_to_join, course_id_to_add)
-            if not student_already_enrolled:
-                db_handler.join_course(
-                    db_config, roll_number_to_join, course_id_to_add)
-                # cls.update_total_price(cls, roll_number_to_join)
-                cls.update_total_price(
-                    db_handler, db_config, roll_number_to_join)
-            else:
-                print_colored_message(
-                    f"The User with roll number {roll_number_to_join} is already enrolled into {course_id_to_add} course", Colors.RED)
-        else:
-            print_colored_message("No Such Course ID", Colors.RED)
-        input("\n Press any key to continue")
-
-    @classmethod
-    def opt_course(cls, db_handler, db_config):
-        """
-        Opts a student out of a course.
-
-        Args:
-            db_handler (DatabaseHandler): A DatabaseHandler object.
-        """
-        try:
-            roll_number_to_opt = int(
-                input("Enter the roll number to get Opt from a course: "))
-        except ValueError:
-            roll_number_to_opt = int(
-                input("Invalid roll number format, please check roll number and enter again: "))
-        # show_all_course()
-        student = cls.get_student(db_handler, db_config)
-        Academy.show_all_course(db_handler, db_config, show=True)
-        try:
-            course_id_to_remove = int(
-                input("Enter the ID of the course you want to remove:  "))
-        except ValueError:
-            course_id_to_remove = int(
-                input("Invalid roll number format, please check roll number and enter again: "))
-        courses = db_handler.get_courses(db_config)
-        # print(list(courses.keys()))
-        # print(course_id_to_remove)
-        # ipdb.set_trace()
-        course_ids_list = list(courses.keys())
-        if course_id_to_remove in course_ids_list:
-            # student[roll_number_to_opt]["Enrolled_list"].remove(course_id_to_remove)
-            # refunded = float(student[int(roll_number_to_opt)]['Total_cost'])
-            # paid_total = float(student[int(roll_number_to_opt)]['Paid'])
-            # student[int(roll_number_to_opt)]['Paid'] = paid_total - (refunded *0.2)
-
-            # print(student)
-            # input()
-            # cls.write_student(db_handler,student)
-            db_handler.opt_course(
-                db_config, roll_number_to_opt, course_id_to_remove)
-            cls.update_total_price(db_handler, db_config,
-                                   int(roll_number_to_opt))
-        else:
-            print_colored_message("No Such Course ID", Colors.RED)
-            input()
-
-    @staticmethod
-    def change_session(db_handler, db_config):
-        """
-        Changes the session for all students, checking their fee status.
-
-        Args:
-            db_handler (DatabaseHandler): A DatabaseHandler object.
-        """
-        print_colored_message("\n\t\tChanging Session", Colors.GREEN)
-        student = db_handler.get_student(db_config)
-        for key, values in student.items():
-            remaning = Student.get_remaining_payment(
-                Student, int(key), db_handler, db_config)
-            if remaning > 0:
-                print_colored_message(
-                    f"\t\tThe Student {values['first_name']} have {remaning} fee, please check whith him/her once", Colors.RED)
-            if remaning < 0:
-                remaning = remaning * -1
-                print_colored_message(
-                    f"\t\tThe Student {values['first_name']} {values['last_name']} have {remaning} fee over charged, please check whith him/her once", Colors.GREEN)
-        input("\n\nContinue ....")
+        db_handler.add_student(student_tuple)
 
 
 class Academy:
 
-    @classmethod
-    def start_db_handeling(cls):
-        """
-        Initializes database handling for the student.
-        """
-        cls.db_handler = DatabaseHandler()
-        cls.db_config = cls.db_handler.start_db_handeling()
-
     @staticmethod
-    def add_academy(all_academy, db_handler):
+    def show_all_course(show=False):
         """
-        Adds a new academy and its courses to the database.
-
+        Displays all courses and their details from the database. 
+        If the `show` parameter is True, it prints the courses without clearing the screen;
+        otherwise, it clears the screen before displaying the courses.
         Args:
-            all_academy (dict): A dictionary containing all academies and their courses.
-            db_handler (DatabaseHandler): A DatabaseHandler object to interact with the database.
-        """
-        # all_academy, _ =  db_handler.get_course()
-        academy_name = input("Enter Name of Academy: ")
-        course_detail = input(
-            "Enter Academy details like (Coursename:price,coursename2:price) :")
-        courses = course_detail.split(",")
-        for course in courses:
-            courses_name, course_price = course.split(":")
-            if academy_name not in all_academy:
-                all_academy[academy_name] = {courses_name: course_price}
-            else:
-                all_academy[academy_name].update({courses_name: course_price})
-        db_handler.write_courses(all_academy)
-
-    @staticmethod
-    def remove_academy(all_academy, db_handler):
-        """
-        Removes an academy from the database.
-
-        Args:
-            all_academy (dict): A dictionary containing all academies and their courses.
-            db_handler (DatabaseHandler): A DatabaseHandler object to interact with the database.
-        """
-        remove = input("Enter Academy Name: ")
-        if remove in all_academy:
-            all_academy.pop(remove)
-            db_handler.write_courses(all_academy)
-        else:
-            print_colored_message(
-                f"Cant find the Academy named {remove}", Colors.RED)
-        input("\n\nContinue...")
-
-    @staticmethod
-    def show_all_course(db_handler, db_config, show=False):
-        """
-        Displays all courses and their details from the database.
-
-        Args:
-            db_handler (DatabaseHandler): A DatabaseHandler object to interact with the database.
+            show (bool): A flag to determine whether to clear the screen before displaying the courses.
         """
         if not show:
             os.system("clear")
-        all_course_list = db_handler.get_courses(db_config)
-        # print(all_course_list)
+        all_course_list = db_handler.get_courses()
         print('''Course ID \t Course Name \t\t\t\t\t\t\t Course Price''')
         print("_"*100)
         for value, row in all_course_list.items():
@@ -407,22 +314,36 @@ class Academy:
         input("\n\nContinue...")
 
     @staticmethod
-    def get_courses(db_handler, db_config):
+    def get_courses():
         """
         Retrieves all courses from the database.
-
-        Args:
-            db_handler (DatabaseHandler): A DatabaseHandler object to interact with the database.
 
         Returns:
             tuple: A tuple containing a dictionary of all courses and their details.
         """
-        return db_handler.get_courses(db_config)
+        return db_handler.get_courses()
 
     @staticmethod
-    def if_student_enrolled(db_handler, db_config, student_id, course_id):
-        return db_handler.get_student_courses(db_config, student_id, course_id)
+    def if_student_enrolled(student_id, course_id):
+        """
+        Checks if a specific student, identified by their roll number, is enrolled in a specific course, identified by the course ID. Returns True if the student is enrolled in the course, otherwise False.
+        
+        Args:
+            student_id (int): The roll number of the student.
+            course_id (int): The ID of the course.
+        
+        Returns:
+            bool: True if the student is enrolled in the specified course, otherwise False.
+        """
+
+        return db_handler.get_student_courses(student_id, course_id)
 
     @staticmethod
-    def get_academy(db_handler, db_config):
-        return db_handler.get_academies(db_config)
+    def get_academy():
+        """
+        Retrieves details of the academy from the database.
+
+        Returns:
+            dict: A dictionary containing the academy's details.
+        """
+        return db_handler.get_academies()
