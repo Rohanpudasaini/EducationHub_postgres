@@ -99,10 +99,11 @@ class Student:
     def join_course(cls):
         """
         Enrolls a student in a new course. 
-        Prompts the user to enter the roll number of the student and the ID of the course they wish to enroll in. 
-        It checks if the student is already enrolled in the specified course. 
-        If not, it proceeds to enroll the student in the course and updates the total course price for the student. 
-        If the student is already enrolled or if the course ID is invalid, it displays an appropriate message.
+        Prompts the user to enter the roll number of the student and the ID of the course they wish to
+        enroll in. It checks if the student is already enrolled in the specified course. If not, it 
+        proceeds to enroll the student in the course and updates the total course price for the 
+        student. If the student is already enrolled or if the course ID is invalid, 
+        it displays an appropriate message.
         """
         try:
             roll_number_to_join = int(
@@ -137,9 +138,10 @@ class Student:
     def opt_course(cls):
         """
         Opts a student out of a course. 
-        Prompts the user to enter the roll number of the student and the ID of the course they wish to opt out of. 
-        It verifies if the course ID is valid and if the student is enrolled in that course before proceeding to opt the student out of the course. 
-        After opting out, it updates the student's total course price.
+        Prompts the user to enter the roll number of the student and the ID of the course they wish to
+        opt out of. It verifies if the course ID is valid and if the student is enrolled in that 
+        course before proceeding to opt the student out of the course. After opting out, it updates 
+        the student's total course price.
         Args:
             db_handler (DatabaseHandler): A DatabaseHandler object.
         """
@@ -248,7 +250,8 @@ class Student:
     @staticmethod
     def get_enrolled_list(id):
         """
-        Retrieves a list of courses a specific student, identified by their roll number, is enrolled in.
+        Retrieves a list of courses a specific student, identified by their roll number,
+        is enrolled in.
 
         Args:
             id (int): The roll number of the student.
@@ -276,7 +279,8 @@ class Student:
             firstname = "".join(full_name)
             lastname = ""
         print_colored_message(
-            f"Your new roll number will be assigned automatically at the end, please wait...", Colors.YELLOW)
+            f"Your new roll number will be assigned automatically at the end, please wait...",
+            Colors.YELLOW)
 
         while True:
             try:
@@ -326,7 +330,9 @@ class Academy:
     @staticmethod
     def if_student_enrolled(student_id, course_id):
         """
-        Checks if a specific student, identified by their roll number, is enrolled in a specific course, identified by the course ID. Returns True if the student is enrolled in the course, otherwise False.
+        Checks if a specific student, identified by their roll number, is enrolled in a specific 
+        course, identified by the course ID. Returns True if the student is enrolled in the course, 
+        otherwise False.
 
         Args:
             student_id (int): The roll number of the student.
