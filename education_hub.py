@@ -99,7 +99,7 @@ def show_university():
         print_colored_message(f"{key}", Colors.YELLOW)
         print("_"*80)
         print_colored_message(
-            f"\t\t\t Academy Name:: {academy_info[values['accademy_id']]}", Colors.YELLOW)
+            f"\t\t\t Academy Name: {academy_info[values['accademy_id']]}", Colors.YELLOW)
         for key2, values2 in values.items():
             print_colored_message(
                 f"\t\t\t {key2.strip()}: {values2}", Colors.YELLOW)
@@ -107,6 +107,12 @@ def show_university():
     match choice:
 
         case "1":
+            if  not Academy.add_academy():
+                print_colored_message("The Academy with same name already exsist,",
+                                  Colors.RED)
+                input("Continue..")
+
+        case "2":
             # show_main_menu
             return False
         case _:

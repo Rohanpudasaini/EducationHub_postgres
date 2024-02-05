@@ -60,9 +60,9 @@ _/_/_/_/    _/_/_/    _/_/_/    _/_/_/    _/_/_/      _/_/  _/    _/_/    _/    
 
 
 def show_courses_menu():
-    # print_colored_message("\n\t\t\t1. Add Academy",Colors.GREEN)
+    print_colored_message("\n\t\t\t1. Add Academy",Colors.GREEN)
     # print_colored_message("\t\t\t2. Remove Academy",Colors.BLUE)
-    print_colored_message("\n\t\t\t1. Exit", Colors.RED)
+    print_colored_message("\n\t\t\t2. Exit", Colors.RED)
     print("\n\n\n\n")
     choice = input("\t\t\t\t\tEnter your choice: ")
     return choice

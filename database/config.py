@@ -5,27 +5,25 @@ import os
 load_dotenv()
 
 
-def load_config():
+def load_database_connection_and_cursor():
     host = os.getenv('host')
     database = os.getenv('database')
     user = os.getenv('user')
     password = os.getenv('password')
-    # config = dict(os.environ)
     config = {"host": host, "database": database,
               "user": user, "password": password}
-    print(config)
     postgress_connection = psycopg2.connect(**config)
     postgress_cursor = postgress_connection.cursor()
     return postgress_connection, postgress_cursor
 
 
 if __name__ == '__main__':
-    conn, curr = (load_config())
+    conn, curr = (load_database_connection_and_cursor())
     curr.execute("""SELECT * FROM students;""")
     print(curr.fetchall())
 
 
-# def load_config(filename='database/database.ini', section='postgresql'):
+# def load_database_connection_and_cursor(filename='database/database.ini', section='postgresql'):
 #     parser = ConfigParser()
 #     parser.read(filename)
 

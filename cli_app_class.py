@@ -295,6 +295,26 @@ class Student:
 
 class Academy:
 
+    @classmethod
+    def add_academy(cls):
+        """
+        Add a new academy to the database.
+
+        Args:
+            academy_name(str): Name of the academy you want to add. 
+        """
+        academy_name = input(
+            "Enter the name of the academy that you want to add: ")
+        academy_data = cls.get_academy()
+        print(academy_data)
+        input()
+        if academy_name not in academy_data.values():
+            db_handler.add_academy(academy_name)
+            return True
+        else:
+            return False
+            
+
     @staticmethod
     def show_all_course(show=False):
         """

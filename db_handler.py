@@ -1,5 +1,5 @@
 import psycopg2
-from database.config import load_config
+from database.config import load_database_connection_and_cursor
 from functools import reduce
 
 
@@ -18,7 +18,7 @@ def get_student():
     COMMAND = """SELECT * FROM students
         ORDER BY roll_number ASC;"""
     try:
-        connection, cursor = load_config()
+        connection, cursor = load_database_connection_and_cursor()
         cursor.execute(COMMAND)
         result_student = cursor.fetchall()
         if len(result_student) != 0:
@@ -46,7 +46,7 @@ def get_courses():
     """
     COMMAND = """SELECT * FROM courses;"""
     try:
-        connection, cursor = load_config()
+        connection, cursor = load_database_connection_and_cursor()
         cursor.execute(COMMAND)
         result_courses = cursor.fetchall()
         if len(result_courses) != 0:
@@ -72,12 +72,14 @@ def get_academies():
     """
     COMMAND = """SELECT * FROM academies;"""
     try:
-        connection, cursor = load_config()
+        connection, cursor = load_database_connection_and_cursor()
         cursor.execute(COMMAND)
         resultant_academy = cursor.fetchall()
         dict_academy = {}
-        for row in resultant_academy:
-            dict_academy.update({row[0]: row[1]})
+        for row_academy in resultant_academy:
+
+            # map into dict_academy{academy_id:academy_name}
+            dict_academy.update({row_academy[0]: row_academy[1]})
         return (dict_academy)
     except psycopg2.DatabaseError as error:
         print(error)
@@ -102,7 +104,7 @@ def get_enrolled_list(id):
     """
     COMMAND = """SELECT * FROM student_courses WHERE student_id = (%s);"""
     try:
-        connection, cursor = load_config()
+        connection, cursor = load_database_connection_and_cursor()
         cursor.execute(COMMAND, (id,))
         result_enrolled_list = cursor.fetchall()
 
@@ -135,7 +137,7 @@ def get_course_name(enrolled_list):
     if len(enrolled_list) != 0:
         COMMAND = """SELECT course_name FROM COURSES WHERE course_id IN %s;"""
         try:
-            connection, cursor = load_config()
+            connection, cursor = load_database_connection_and_cursor()
             cursor.execute(COMMAND, (tuple(enrolled_list),))
             result = cursor.fetchall()
             return result
@@ -159,7 +161,7 @@ def add_student(student_tuple):
 
     COMMAND = """INSERT INTO students(first_name,last_name,total_paid) VALUES (%s,%s,%s);"""
     try:
-        connection, cursor = load_config()
+        connection, cursor = load_database_connection_and_cursor()
         cursor.execute(COMMAND, student_tuple)
         connection.commit()
 
@@ -184,7 +186,7 @@ def update_student(roll_no, student):
     new_tuple = (student) + (roll_no,)
     COMMAND = "UPDATE students SET first_name = (%s), last_name= (%s), total_course_cost= (%s), total_paid= (%s) WHERE roll_number= (%s);"
     try:
-        connection, cursor = load_config()
+        connection, cursor = load_database_connection_and_cursor()
         cursor.execute(COMMAND, new_tuple)
         connection.commit()
     except psycopg2.DatabaseError as error:
@@ -206,7 +208,7 @@ def remove_student(id):
     """
     COMMAND = """DELETE FROM students WHERE roll_number =(%s);"""
     try:
-        connection, cursor = load_config()
+        connection, cursor = load_database_connection_and_cursor()
         cursor.execute(COMMAND, (id,))
         connection.commit()
     except psycopg2.DatabaseError as error:
@@ -233,7 +235,7 @@ def get_student_courses(student_id, course_id):
     COMMAND = """SELECT * FROM student_courses WHERE student_id = (%s) AND course_id = (%s)"""
     new_tuple = (student_id, course_id)
     try:
-        connection, cursor = load_config()
+        connection, cursor = load_database_connection_and_cursor()
         cursor.execute(COMMAND, new_tuple)
         return cursor.fetchall()
 
@@ -261,7 +263,7 @@ def get_student_all_courses(student_id):
     COMMAND = """SELECT * FROM student_courses WHERE student_id = (%s) """
     new_tuple = (student_id,)
     try:
-        connection, cursor = load_config()
+        connection, cursor = load_database_connection_and_cursor()
         cursor.execute(COMMAND, new_tuple)
         return cursor.fetchall()
     except psycopg2.DatabaseError as error:
@@ -284,7 +286,7 @@ def join_course(student_id, course_id):
     """
     COMMAND = """INSERT INTO student_courses(student_id,course_id) VALUES (%s,%s)"""
     try:
-        connection, cursor = load_config()
+        connection, cursor = load_database_connection_and_cursor()
         cursor.execute(COMMAND, (student_id, course_id))
         connection.commit()
     except psycopg2.DatabaseError as error:
@@ -307,7 +309,7 @@ def opt_course(student_id, course_id):
     """
     COMMAND = "DELETE FROM student_courses WHERE student_id=(%s) AND course_id=(%s)"
     try:
-        connection, cursor = load_config()
+        connection, cursor = load_database_connection_and_cursor()
         cursor.execute(COMMAND, (student_id, course_id))
         connection.commit()
     except psycopg2.DatabaseError as error:
@@ -315,6 +317,31 @@ def opt_course(student_id, course_id):
     finally:
         cursor.close()
         connection.close()
+
+def add_academy(academy_name):
+    """
+    Add Adacemy of given name into the academies table of database.
+    
+    Args:
+        academy_name(string): Name of the academy.
+        
+    Raises:
+        psycopg2.DatabaseError: If the unenrollment operation fails due to a database error.
+    """
+    COMMAND = "INSERT INTO academies(academy_name)VALUES (%s);"
+    
+    try:
+        connection, cursor = load_database_connection_and_cursor()
+        cursor.execute(COMMAND,(academy_name,))
+        connection.commit()
+        
+    except psycopg2.DatabaseError as error:
+        print(error)
+    
+    finally:
+        cursor.close()
+        connection.close()
+    
 
 
 if __name__ == "__main__":
