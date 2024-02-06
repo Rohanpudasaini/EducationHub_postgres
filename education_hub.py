@@ -1,4 +1,3 @@
-"""Functions import for clearing screen"""
 import os
 import sys
 from cli_app_class import Student, Academy
@@ -8,7 +7,7 @@ from display_functions import show_main_menu
 
 
 def show_student_rows():
-    
+
     os.system("clear")
     student = Student.get_student()
     print("Student Name \t\t| |     Student Roll Number \t|| Enrolled List")
@@ -94,7 +93,7 @@ def show_student_rows():
 
 
 def show_university():
-    
+
     os.system("clear")
     all_academy = Academy.get_courses()
     academy_info = Academy.get_academy()
@@ -127,7 +126,7 @@ def show_university():
 
 
 def main():
-    
+
     show_welcome_screen()
     while True:
         choice = show_main_menu()

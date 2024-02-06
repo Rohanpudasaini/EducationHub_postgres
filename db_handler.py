@@ -1,4 +1,3 @@
-"""Imports to get reduce function and databse cursor from `database.config`"""
 from functools import reduce
 from database.config import get_database_cursor
 
@@ -7,7 +6,7 @@ class DBHandler:
 
     @classmethod
     def get_enrolled_list(cls, student_id):
-        
+
         command = """SELECT * FROM student_courses WHERE student_id = (%s);"""
 
         with get_database_cursor() as cursor:
@@ -23,7 +22,7 @@ class DBHandler:
 
     @staticmethod
     def get_student():
-        
+
         command = """SELECT * FROM students
             ORDER BY roll_number ASC;"""
 
@@ -37,7 +36,7 @@ class DBHandler:
 
     @staticmethod
     def get_courses():
-        
+
         command = """SELECT * FROM courses;"""
 
         with get_database_cursor() as cursor:
@@ -50,7 +49,7 @@ class DBHandler:
 
     @staticmethod
     def get_academies():
-        
+
         command = """SELECT * FROM academies;"""
 
         with get_database_cursor() as cursor:
@@ -65,7 +64,7 @@ class DBHandler:
 
     @staticmethod
     def get_course_name(enrolled_list):
-        
+
         if len(enrolled_list) != 0:
             command = """SELECT course_name FROM COURSES WHERE course_id IN %s;"""
 
@@ -86,7 +85,7 @@ class DBHandler:
 
     @staticmethod
     def update_student(roll_no, student):
-        
+
         new_tuple = (student) + (roll_no,)
         command = """UPDATE students SET
         first_name = (%s)
@@ -100,7 +99,7 @@ class DBHandler:
 
     @staticmethod
     def remove_student(student_id):
-        
+
         command = """DELETE FROM students WHERE roll_number =(%s);"""
 
         with get_database_cursor() as cursor:
@@ -108,7 +107,7 @@ class DBHandler:
 
     @staticmethod
     def get_student_courses(student_id, course_id):
-        
+
         command = """SELECT * FROM student_courses WHERE
         student_id = (%s)
         AND course_id = (%s)"""
@@ -121,7 +120,7 @@ class DBHandler:
 
     @staticmethod
     def get_student_all_courses(student_id):
-        
+
         command = """SELECT * FROM student_courses WHERE student_id = (%s) """
         new_tuple = (student_id,)
 
@@ -131,7 +130,7 @@ class DBHandler:
 
     @staticmethod
     def join_course(student_id, course_id):
-        
+
         command = """INSERT INTO student_courses(student_id,course_id) VALUES (
             %s,%s
             )"""
@@ -141,7 +140,7 @@ class DBHandler:
 
     @staticmethod
     def opt_course(student_id, course_id):
-        
+
         command = """DELETE FROM student_courses WHERE
         student_id=(%s)
         AND course_id=(%s)"""
@@ -151,7 +150,7 @@ class DBHandler:
 
     @staticmethod
     def add_academy(academy_name):
-        
+
         command = "INSERT INTO academies(academy_name)VALUES (%s);"
 
         with get_database_cursor() as cursor:

@@ -266,7 +266,7 @@ class Academy:
 
     @staticmethod
     def get_courses():
-        
+
         return DBHandler.get_courses()
 
     @staticmethod
