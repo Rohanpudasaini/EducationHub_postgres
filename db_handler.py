@@ -1,3 +1,4 @@
+"""Imports to get reduce function and databse cursor from `database.config`"""
 from functools import reduce
 from database.config import get_database_cursor
 
@@ -19,11 +20,11 @@ def get_student():
     Raises:
         psycopg2.DatabaseError: If a database operation fails.
     """
-    COMMAND = """SELECT * FROM students
+    command = """SELECT * FROM students
         ORDER BY roll_number ASC;"""
 
     with get_database_cursor() as cursor:
-        cursor.execute(COMMAND)
+        cursor.execute(command)
         result_student = cursor.fetchall()
         if len(result_student) != 0:
             return (reduce(lambda students_dict, x: (students_dict.update({
@@ -46,16 +47,15 @@ def get_courses():
     Raises:
         psycopg2.DatabaseError: If a database operation fails.
     """
-    COMMAND = """SELECT * FROM courses;"""
+    command = """SELECT * FROM courses;"""
 
     with get_database_cursor() as cursor:
-        cursor.execute(COMMAND)
+        cursor.execute(command)
         result_courses = cursor.fetchall()
         if len(result_courses) != 0:
             return (reduce(lambda course_dict, x: (course_dict.update({
                 x[0]: {"accademy_id": x[1], "course_name": x[2], "course_price": x[3]}}))
                            or course_dict, result_courses, {}))
-
 
 def get_academies():
     """
@@ -72,10 +72,10 @@ def get_academies():
     Raises:
         psycopg2.DatabaseError: If a database operation fails.
     """
-    COMMAND = """SELECT * FROM academies;"""
+    command = """SELECT * FROM academies;"""
 
     with get_database_cursor() as cursor:
-        cursor.execute(COMMAND)
+        cursor.execute(command)
         resultant_academy = cursor.fetchall()
         dict_academy = {}
         for row_academy in resultant_academy:
@@ -99,10 +99,10 @@ def get_enrolled_list(student_id):
     Raises:
         psycopg2.DatabaseError: If a database operation fails.
     """
-    COMMAND = """SELECT * FROM student_courses WHERE student_id = (%s);"""
+    command = """SELECT * FROM student_courses WHERE student_id = (%s);"""
 
     with get_database_cursor() as cursor:
-        cursor.execute(COMMAND, (student_id,))
+        cursor.execute(command, (student_id,))
         result_enrolled_list = cursor.fetchall()
 
         # The data from database comes in format `[(1, 1), (1, 4), (1, 2)]`
@@ -127,10 +127,10 @@ def get_course_name(enrolled_list):
         psycopg2.DatabaseError: If a database operation fails.
     """
     if len(enrolled_list) != 0:
-        COMMAND = """SELECT course_name FROM COURSES WHERE course_id IN %s;"""
+        command = """SELECT course_name FROM COURSES WHERE course_id IN %s;"""
 
         with get_database_cursor() as cursor:
-            cursor.execute(COMMAND, (tuple(enrolled_list),))
+            cursor.execute(command, (tuple(enrolled_list),))
             result = cursor.fetchall()
             return result
 
@@ -148,12 +148,12 @@ def add_student(student_tuple):
         database operation failure.
     """
 
-    COMMAND = """INSERT INTO students(first_name,last_name,total_paid) VALUES(
+    command = """INSERT INTO students(first_name,last_name,total_paid) VALUES(
         %s,%s,%s
         );"""
 
     with get_database_cursor() as cursor:
-        cursor.execute(COMMAND, student_tuple)
+        cursor.execute(command, student_tuple)
 
 
 def update_student(roll_no, student):
@@ -169,7 +169,7 @@ def update_student(roll_no, student):
         to a database operation failure.
     """
     new_tuple = (student) + (roll_no,)
-    COMMAND = """UPDATE students SET
+    command = """UPDATE students SET
     first_name = (%s)
     last_name= (%s)
     total_course_cost= (%s),
@@ -177,7 +177,7 @@ def update_student(roll_no, student):
     WHERE roll_number= (%s);"""
 
     with get_database_cursor() as cursor:
-        cursor.execute(COMMAND, new_tuple)
+        cursor.execute(command, new_tuple)
 
 
 def remove_student(student_id):
@@ -191,10 +191,10 @@ def remove_student(student_id):
         psycopg2.DatabaseError: If the student cannot be removed due to a
         database operation failure.
     """
-    COMMAND = """DELETE FROM students WHERE roll_number =(%s);"""
+    command = """DELETE FROM students WHERE roll_number =(%s);"""
 
     with get_database_cursor() as cursor:
-        cursor.execute(COMMAND, (student_id,))
+        cursor.execute(command, (student_id,))
 
 
 def get_student_courses(student_id, course_id):
@@ -211,14 +211,14 @@ def get_student_courses(student_id, course_id):
     Raises:
         psycopg2.DatabaseError: If the operation fails due to a database error.
     """
-    COMMAND = """SELECT * FROM student_courses WHERE
+    command = """SELECT * FROM student_courses WHERE
     student_id = (%s)
     AND course_id = (%s)"""
 
     new_tuple = (student_id, course_id)
 
     with get_database_cursor() as cursor:
-        cursor.execute(COMMAND, new_tuple)
+        cursor.execute(command, new_tuple)
         return cursor.fetchall()
 
 
@@ -235,11 +235,11 @@ def get_student_all_courses(student_id):
     Raises:
         psycopg2.DatabaseError: If the operation fails due to a database error.
     """
-    COMMAND = """SELECT * FROM student_courses WHERE student_id = (%s) """
+    command = """SELECT * FROM student_courses WHERE student_id = (%s) """
     new_tuple = (student_id,)
 
     with get_database_cursor() as cursor:
-        cursor.execute(COMMAND, new_tuple)
+        cursor.execute(command, new_tuple)
         return cursor.fetchall()
 
 
@@ -255,12 +255,12 @@ def join_course(student_id, course_id):
         psycopg2.DatabaseError: If the enrollment operation fails due to a
         database error.
     """
-    COMMAND = """INSERT INTO student_courses(student_id,course_id) VALUES (
+    command = """INSERT INTO student_courses(student_id,course_id) VALUES (
         %s,%s
         )"""
 
     with get_database_cursor() as cursor:
-        cursor.execute(COMMAND, (student_id, course_id))
+        cursor.execute(command, (student_id, course_id))
 
 
 def opt_course(student_id, course_id):
@@ -275,12 +275,12 @@ def opt_course(student_id, course_id):
         psycopg2.DatabaseError: If the unenrollment operation fails due to a
         database error.
     """
-    COMMAND = """DELETE FROM student_courses WHERE
+    command = """DELETE FROM student_courses WHERE
     student_id=(%s)
     AND course_id=(%s)"""
 
     with get_database_cursor() as cursor:
-        cursor.execute(COMMAND, (student_id, course_id))
+        cursor.execute(command, (student_id, course_id))
 
 
 def add_academy(academy_name):
@@ -294,10 +294,10 @@ def add_academy(academy_name):
         psycopg2.DatabaseError: If the unenrollment operation fails due to a
         database error.
     """
-    COMMAND = "INSERT INTO academies(academy_name)VALUES (%s);"
+    command = "INSERT INTO academies(academy_name)VALUES (%s);"
 
     with get_database_cursor() as cursor:
-        cursor.execute(COMMAND, (academy_name,))
+        cursor.execute(command, (academy_name,))
 
 
 if __name__ == "__main__":

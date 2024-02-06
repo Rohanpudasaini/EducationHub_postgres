@@ -1,4 +1,5 @@
 # from configparser import ConfigParser
+"""Import for clearing cli screen and loading environment variable"""
 import os
 from contextlib import contextmanager
 import psycopg2

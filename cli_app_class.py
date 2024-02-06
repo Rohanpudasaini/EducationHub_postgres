@@ -184,7 +184,8 @@ and enter again: """))
                 cls.update_total_price(roll_number_to_join)
             else:
                 print_colored_message(
-                    f"The User with roll number {roll_number_to_join} is already enrolled into {course_id_to_add} course", Colors.RED)
+                    f"The User with roll number {roll_number_to_join} is already enrolled into {course_id_to_add} course",
+                    Colors.RED)
         else:
             print_colored_message("No Such Course ID", Colors.RED)
         input("\n Press any key to continue")
