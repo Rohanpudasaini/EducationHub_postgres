@@ -8,10 +8,7 @@ from display_functions import show_main_menu
 
 
 def show_student_rows():
-    """
-    Show the student's menue defined in `display_functions.py',
-    and let user choose next move
-    """
+    
     os.system("clear")
     student = Student.get_student()
     print("Student Name \t\t| |     Student Roll Number \t|| Enrolled List")
@@ -97,10 +94,7 @@ def show_student_rows():
 
 
 def show_university():
-    """
-    Show University's main menu as defined in `display_functions.py`,
-    and let user choose 
-    """
+    
     os.system("clear")
     all_academy = Academy.get_courses()
     academy_info = Academy.get_academy()
@@ -133,10 +127,7 @@ def show_university():
 
 
 def main():
-    """
-    Main function, which will run the cli app, It is ensured that the function
-    is called only when the function is called from same file.
-    """
+    
     show_welcome_screen()
     while True:
         choice = show_main_menu()
